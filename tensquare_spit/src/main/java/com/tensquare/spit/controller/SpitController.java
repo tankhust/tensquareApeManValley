@@ -25,6 +25,7 @@ public class SpitController {
     @Autowired
     private RedisTemplate redisTemplate;
 
+
     @RequestMapping(method = RequestMethod.GET)
     public Result findAll() {
         return new Result(true, StatusCode.OK,"查询成功",spitService.findAll());
