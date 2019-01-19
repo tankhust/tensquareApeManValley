@@ -9,8 +9,11 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
+import javax.servlet.http.HttpServletRequest;
 
+import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,12 +21,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import util.IdWorker;
 
 import com.tensquare.user.dao.UserDao;
 import com.tensquare.user.pojo.User;
+import util.JwtUtil;
 
 /**
  * 服务层
@@ -45,6 +50,15 @@ public class UserService {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+    private BCryptPasswordEncoder encoder;
+
+	@Autowired
+	private HttpServletRequest request;
+
+	@Autowired
+	private JwtUtil jwtUtil;
 
 	/**
 	 * 查询全部列表
@@ -94,6 +108,7 @@ public class UserService {
 	 */
 	public void add(User user) {
 		user.setId( idWorker.nextId()+"" );
+		user.setPassword(encoder.encode(user.getPassword()));
 		user.setFollowcount(0);//关注数
 		user.setFanscount(0);//粉丝数
 		user.setOnline(0L);//在线时长
@@ -112,10 +127,14 @@ public class UserService {
 	}
 
 	/**
-	 * 删除
+	 * 删除 必须有admin角色才能删除
 	 * @param id
 	 */
 	public void deleteById(String id) {
+		String token = (String)request.getAttribute("claims_admin");
+		if (StringUtils.isEmpty(token)) {
+			throw new RuntimeException("权限不足！");
+		}
 		userDao.deleteById(id);
 	}
 
@@ -184,8 +203,17 @@ public class UserService {
 		map.put("mobile", mobile);
 		map.put("checkcode", checkcode);
 		//给用户发一份
-		rabbitTemplate.convertAndSend("sms", map);
+		//rabbitTemplate.convertAndSend("sms", map);
 		//在控制台显示一份【方便测试】
 		System.out.println("验证码为："+checkcode);
 	}
+
+
+    public User login(String mobile, String password) {
+        User user = userDao.findByMobile(mobile);
+        if (user != null && encoder.matches(password, user.getPassword())) {
+            return user;
+        }
+        return null;
+    }
 }
