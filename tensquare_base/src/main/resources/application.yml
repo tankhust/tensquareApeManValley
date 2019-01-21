@@ -1,5 +1,5 @@
 server:
-  port: 9201
+  port: 9001
 spring:
   application:
     name: tensquare-base
@@ -12,6 +12,8 @@ spring:
     database: MYSQL
     show-sql: true
     generate-ddl: true
+  rabbitmq:
+    host: 192.168.172.131
 eureka:
   client:
     service-url:
