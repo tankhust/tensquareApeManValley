@@ -26,16 +26,12 @@ public class JwtInterceptor implements HandlerInterceptor {
         //无论如何都放行。具体能不能操作还是在具体的操作中去判断
         //拦截器只是复杂吧头请求头中包含token的令牌进行解析认证
         String header = request.getHeader("Authorization");
-        if (StringUtils.isEmpty(header)) {
-            throw new RuntimeException("权限不足");
-        }
-        if (!header.startsWith("Bearer ")) {
-            throw new RuntimeException("权限不足");
-        }
         if (!StringUtils.isEmpty(header)) {
             //如果有包含head为Authorization的头进行，就对其进行解析
             if (header.startsWith("Bearer ")) {
+                //得到token
                 String token = header.substring(7);
+                //对令牌进行验证
                 try {
                     Claims claims = jwtUtil.parseJWT(token);
                     String roles = (String) claims.get("roles");

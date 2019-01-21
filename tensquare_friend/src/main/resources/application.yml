@@ -1,17 +1,19 @@
 server:
-  port: 9201
+  port: 9010
 spring:
   application:
-    name: tensquare-base
+    name: tensquare-friend
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.172.131:3306/tensquare_base?characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.172.131:3306/tensquare_friend?characterEncoding=utf-8&useSSL=false
     username: root
     password: root
   jpa:
     database: MYSQL
     show-sql: true
-    generate-ddl: true
+jwt:
+  config:
+    key: itcast
 eureka:
   client:
     service-url:

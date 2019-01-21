@@ -1,4 +1,4 @@
-package com.tensquare.user.interceptor;
+package com.tensquare.friend.interceptor;
 
 import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
@@ -36,10 +36,10 @@ public class JwtInterceptor implements HandlerInterceptor {
                     Claims claims = jwtUtil.parseJWT(token);
                     String roles = (String) claims.get("roles");
                     if (!StringUtils.isEmpty(roles) && roles.equals("admin")) {
-                        request.setAttribute("claims_admin", token);
+                        request.setAttribute("claims_admin", claims);
                     }
                     if (!StringUtils.isEmpty(roles) && roles.equals("user")) {
-                        request.setAttribute("claims_user", token);
+                        request.setAttribute("claims_user", claims);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException("令牌不正确！");
